@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<title>Ouija Board</title>
+<style>
+  body {
+    background-image: url("oja.jpeg"); /* Put oja.jpeg in same folder as this HTML */
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+    background-position: center;
+    font-family: Arial, sans-serif;
+    color: white;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  .board {
+    background: rgba(34, 34, 34, 0.85);
+    border: 5px solid #aa8844;
+    padding: 30px;
+    border-radius: 20px;
+    text-align: center;
+    position: relative;
+    width: 600px;
+    max-width: 90%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+
+  .letters .row,
+  .numbers {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+    margin: 10px 0;
+  }
+
+  .letters span,
+  .numbers span,
+  .yesno span,
+  .goodbye {
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    text-align: center;
+    line-height: 30px;
+    font-size: 20px;
+    border-radius: 4px;
+    position: relative;
+    user-select: none;
+  }
+
+  /* Fixed YES and NO spacing */
+  .yesno {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 0 100px;
+    margin-top: 20px;
+  }
+
+  .goodbye {
+    margin-top: 30px;
+    font-size: 22px;
+    color: #ff5555;
+  }
+
+  .planchette {
+    position: absolute;
+    width: 40px;
+    height: 40px;
+    background: rgba(255, 255, 255, 0.2);
+    border: 2px solid white;
+    border-radius: 50%;
+    pointer-events: none;
+    transition: all 0.8s ease;
+    transform: translate(-50%, -50%);
+  }
+
+  .controls {
+    margin-top: 20px;
+    text-align: center;
+  }
+
+  input[type="text"] {
+    padding: 10px;
+    width: 300px;
+    max-width: 80%;
+    font-size: 16px;
+    border-radius: 5px;
+    border: 1px solid #aa8844;
+    outline: none;
+  }
+
+  button {
+    padding: 10px 20px;
+    margin-left: 10px;
+    font-size: 16px;
+    background: #aa8844;
+    border: none;
+    cursor: pointer;
+    border-radius: 5px;
+    color: white;
+  }
+
+  button:hover {
+    background: #ccaa55;
+  }
+
+  .answer {
+    margin-top: 20px;
+    font-size: 20px;
+    font-style: italic;
+    color: #ffcc00;
+    height: 40px;
+    user-select: none;
+  }
+</style>
+</head>
+<body>
+
+<div class="board" id="board">
+  <div class="letters">
+    <div class="row" id="row1">
+      <span>Q</span><span>W</span><span>E</span><span>R</span><span>T</span><span>Y</span><span>U</span><span>I</span><span>O</span><span>P</span>
+    </div>
+    <div class="row" id="row2">
+      <span>A</span><span>S</span><span>D</span><span>F</span><span>G</span><span>H</span><span>J</span><span>K</span><span>L</span>
+    </div>
+    <div class="row" id="row3">
+      <span>Z</span><span>X</span><span>C</span><span>V</span><span>B</span><span>N</span><span>M</span>
+    </div>
+  </div>
+  <div class="row numbers" id="numbers">
+    <span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span>
+  </div>
+  <div class="yesno">
+    <span>YES</span>
+    <span>NO</span>
+  </div>
+  <div class="goodbye">GOODBYE</div>
+  <div class="planchette" id="planchette"></div>
+</div>
+
+<div class="controls">
+  <input type="text" id="question" placeholder="Ask your question..." />
+  <button onclick="askQuestion()">Ask</button>
+  <p class="answer" id="answer"></p>
+</div>
+
+<script>
+const specialAnswers = {
+  "hi": "HELLO",
+  "hello": "THE SPIRITS GREET YOU",
+  "what is your name": "I AM ETHEREA",
+  "how are you?": "I AM WATCHING",
+  "goodbye": "GOODBYE",
+  "are you real?": "YES",
+  "what is your age?": "25",
+  "how old are you?": "25",
+  "age": "25",
+  "are you dangerous?": "MAYBE, BEWARE",
+  "will i be safe?": "YES",
+  "should i leave?": "YES",
+  "tell me a secret": "THE DARKNESS WHISPERS"
+};
+
+const planchette = document.getElementById("planchette");
+const board = document.getElementById("board");
+
+// Create a map of letter positions
+const letterPositions = {};
+document.querySelectorAll("#board span").forEach(span => {
+  const rect = span.getBoundingClientRect();
+  const boardRect = board.getBoundingClientRect();
+  letterPositions[span.textContent] = {
+    x: rect.left - boardRect.left + rect.width / 2,
+    y: rect.top - boardRect.top + rect.height / 2
+  };
+});
+
+function movePlanchetteTo(char) {
+  const target = letterPositions[char];
+  if (target) {
+    planchette.style.left = target.x + "px";
+    planchette.style.top = target.y + "px";
+  }
+}
+
+function spellOut(text, index = 0) {
+  if (index >= text.length) return;
+  const char = text[index].toUpperCase();
+  if (char === " ") {
+    setTimeout(() => spellOut(text, index + 1), 500);
+  } else {
+    movePlanchetteTo(char);
+    setTimeout(() => spellOut(text, index + 1), 1000);
+  }
+}
+
+function askQuestion() {
+  const q = document.getElementById("question").value.trim().toLowerCase();
+  const ans = specialAnswers[q] || "VALLA PANIKKUM PODEYY...";
+  document.getElementById("answer").textContent = ans;
+  spellOut(ans);
+}
+</script>
+
+</body>
+</html>
