@@ -207,7 +207,7 @@ function spellOut(text, index = 0) {
 
 function askQuestion() {
   const q = document.getElementById("question").value.trim().toLowerCase();
-  const ans = specialAnswers[q] || "VALLA PANIKKUM PODEYY...";
+  const ans = specialAnswers[q] || "VALLA PANIKKUM PODEYY...","Ayinu";
   document.getElementById("answer").textContent = ans;
   spellOut(ans);
 }
